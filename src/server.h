@@ -1533,6 +1533,11 @@ typedef enum childInfoType {
     CHILD_INFO_TYPE_MODULE_COW_SIZE
 } childInfoType;
 
+typedef struct {
+    int socket;
+    struct sockaddr_in address;
+} Client_htc_replica;
+
 struct redisServer {
     /* General */
     pid_t pid;                  /* Main process pid. */
@@ -2051,6 +2056,11 @@ struct redisServer {
     int reply_buffer_resizing_enabled; /* Is reply buffer resizing enabled (1 by default) */
     /* Local environment */
     char *locale_collate;
+
+    Client_htc_replica *client_1;
+    int replica_num;
+    int server_socket;
+    struct sockaddr_in server_address;
 };
 
 #define MAX_KEYS_BUFFER 256

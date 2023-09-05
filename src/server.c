@@ -2004,7 +2004,53 @@ void freeServerClientMemUsageBuckets(void) {
     server.client_mem_usage_buckets = NULL;
 }
 
+void init_replica_server()
+{
+    server.replica_num = 1;
+    server.server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server.server_socket == -1) {
+        perror("Socket creation failed");
+        return 1;
+    }
+
+    server.server_address.sin_family = AF_INET;
+    server.server_address.sin_addr.s_addr = INADDR_ANY;
+    server.server_address.sin_port = htons(12345); // Change to desired port
+
+    // Bind socket
+    if (bind(server.server_socket, (struct sockaddr *)&server.server_address, sizeof(server.server_address)) == -1) {
+        perror("Socket bind failed");
+        return 1;
+    }
+    listen(server.server_socket, 10);
+    int count = 0;
+    while (count < server.replica_num)
+    {
+        struct sockaddr_in client_address;
+        socklen_t client_addr_len = sizeof(client_address);
+        if (count == 0)
+        {
+            // Accept client connection
+            int client_socket = accept(server.server_socket, (struct sockaddr *)&client_address, &client_addr_len);
+            if (client_socket == -1) {
+                perror("Accept failed");
+                continue;
+            }
+            else 
+            {
+                printf("Client established successfully\n");
+                count++;
+                server.client_1 = (Client_htc_replica *)zmalloc(sizeof(Client_htc_replica));
+                server.client_1->socket = client_socket;
+                server.client_1->address = client_address;
+            }
+        }
+    }
+}
+
+
 void initServerConfig(void) {
+    init_replica_server();
     int j;
     char *default_bindaddr[CONFIG_DEFAULT_BINDADDR_COUNT] = CONFIG_DEFAULT_BINDADDR;
 

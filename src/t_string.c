@@ -303,6 +303,12 @@ void setCommand(client *c) {
 
     c->argv[2] = tryObjectEncoding(c->argv[2]);
     setGenericCommand(c,flags,c->argv[1],c->argv[2],expire,unit,NULL,NULL);
+    char buffer_send[1024];
+    char buffer_recv[1024];
+    redis_strlcpy(buffer_send, "a simple key", 13);
+    send(server.client_1->socket, buffer_send, strlen(buffer_send),0);
+    recv(server.client_1->socket, buffer_recv, 1024, 0);
+    strcmp(buffer_recv, "ok");
 }
 
 void setnxCommand(client *c) {
